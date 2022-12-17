@@ -12,6 +12,7 @@
 import sqlite3
 from tkinter import *
 from tkinter import ttk
+from tkinter.ttk import Radiobutton
 
 root = Tk()
 root.title("Телефонная книга")
@@ -23,6 +24,17 @@ addition_data = ttk.Frame(tab_control)
 tab_control.add(addition_data, text='Добавлеине')
 addition_text = Label(addition_data, text='Добавление данных в телефонную книгу') 
 addition_text.grid(column=0, row=0)
+
+# Выбор между введением пользователя или телефона
+selected = IntVar()
+r_b1 = Radiobutton(addition_data, text="Добавить контактное лицо", value=1, variable=selected)
+r_b1.grid(column=0, row=1)
+r_b1 = Radiobutton(addition_data, text="Добавить номер телефона", value=2, variable=selected)
+r_b1.grid(column=0, row=2)
+
+#Ввод имени пользователя
+ins_name = Entry(addition_data, width=8)
+ins_name.grid(column=0, row=3)
 
 View_data = ttk.Frame(tab_control)
 tab_control.add(View_data, text='Просмотр')
