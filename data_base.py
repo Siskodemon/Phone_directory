@@ -93,7 +93,7 @@ def work_for_table(connection, name_table):
             for i in id:
                     print(f'{i}', end='')
             print()
-            nik = input(f'Введите ник контакта из списка выше: -->')
+            nik = input(f'Введите удаляемый ник контакта из списка выше: -->')
             try:
                 cursor.execute(f"""
                 DELETE FROM
@@ -153,12 +153,6 @@ def work_for_table(connection, name_table):
             print()
             nik = input(f'Введите ник контакта из списка выше: --> ')
             print(f'=================================')
-            cursor.execute(f"SELECT * FROM phone")
-            id = cursor.fetchall()
-            for i in id:
-                print(f'{i}', end='')
-            print()
-            print(f'=================================')
             print(f' Выводим все телефоны контакта {nik}')
             try:
                 cursor.execute(f"""
@@ -170,9 +164,10 @@ def work_for_table(connection, name_table):
                     phone 
                 ON 
                     users.id = phone.user_id
+                WHERE 
+                    nikname = '{nik}'
                 ;""")
                 id = cursor.fetchall()
-                print(f'Тип id - {type(id)}')
                 for i in id:
                     print(f'{i}')
                 connection.commit()
@@ -180,9 +175,100 @@ def work_for_table(connection, name_table):
             except Error as e:
                 print(f"The error '{e}' occurred")
         elif chois == 3:
+            print(f'=================================')
+            cursor.execute(f"SELECT nikname FROM users")
+            id = cursor.fetchall()
+            for i in id:
+                print(f'{i}', end='')
             print()
+            nik = input(f'Введите ник контакта из списка выше: --> ')
+            
+            print(f'=================================')
+            cursor.execute(f"""
+                SELECT 
+                    phone.id, phone.phone, phone.comment 
+                FROM 
+                    users
+                JOIN 
+                    phone 
+                ON 
+                    users.id = phone.user_id
+                WHERE 
+                    nikname = '{nik}'
+                ;""")
+            id = cursor.fetchall()
+            for i in id:
+                print(f'{i}')
+            print()
+            chois = int(input(f'Введите id, по которому будем менять данные: --> '))
+            
+            print(f'=================================')
+            print(f'Введите что будем менять?')
+            print(f'1 - номер телефона, 2 - комментарий')
+            param = int(input(f'--> '))
+            if param == 1:
+                param = 'phone'
+                buf = int(input('Введите новый номер телефона: '))
+            elif param == 2:
+                param = 'comment'
+                buf = input('Введите новый комментарий: ')
+            
+            print(f'=================================')
+            print(f' Перезаписываем поле {param} контакта {nik}, по полю id={chois} ')
+            try:
+                cursor.execute(f"""
+                UPDATE
+                    {name_table}
+                SET
+                    {param} = '{buf}'
+                WHERE
+                    id = {chois}
+                """)
+                id = cursor.fetchall()
+                for i in id:
+                    print(f'{i}')
+                connection.commit()
+                print(f"Телефон контакт {nik} c id={chois} успешно обновлён")
+            except Error as e:
+                print(f"The error '{e}' occurred")
         elif chois == 4:
+            print(f'=================================')
+            cursor.execute(f"SELECT nikname FROM users")
+            id = cursor.fetchall()
+            for i in id:
+                print(f'{i}', end='')
             print()
+            nik = input(f'Введите ник контакта из списка выше: --> ')
+
+            print(f'=================================')
+            cursor.execute(f"""
+                SELECT 
+                    phone.id, phone.phone, phone.comment 
+                FROM 
+                    users
+                JOIN 
+                    phone 
+                ON 
+                    users.id = phone.user_id
+                WHERE 
+                    nikname = '{nik}'
+                ;""")
+            id = cursor.fetchall()
+            for i in id:
+                print(f'{i}')
+            print()
+            chois = int(input(f'Введите id, по которому будем удалять данные: --> '))
+            try:
+                cursor.execute(f"""
+                DELETE FROM
+                    {name_table}
+                WHERE
+                    id = {chois}
+                """)
+                connection.commit()
+                print(f"Данные контакта {nik} по id={chois} успешно удалены.")
+            except Error as e:
+                print(f"The error '{e}' occurred")
         # try:
         #     cursor.execute(query)
         #     connection.commit()
