@@ -12,6 +12,18 @@ def create_connection(path):
 
     return connection
 
+#Вывод списка значений из поля nikname
+def nik_output(focus,table):
+    print(f'=================================')
+    focus.execute(f"SELECT nikname FROM {table}")
+    id = focus.fetchall()
+    for i in id:
+        print(f'{i}', end='')
+    print()
+    nikname= input(f'Введите ник контакта из списка выше: -->')
+    print(f'=================================')
+    return nikname
+
 # Работа с таблицей в инициализированной бд
 def work_for_table(connection, name_table):
     cursor = connection.cursor()
@@ -42,14 +54,7 @@ def work_for_table(connection, name_table):
             for i in id:
                 print(i)
         elif chois == 3:
-            print(f'=================================')
-            cursor.execute(f"SELECT nikname FROM {name_table}")
-            id = cursor.fetchall()
-            for i in id:
-                print(f'{i}', end='')
-            print()
-            nik = input(f'Введите ник контакта из списка выше: -->')
-            print(f'=================================')
+            nik = nik_output(cursor,'users')
             print(f'Имя - 1, Фамилию - 2, Отчество - 3, Ник - 4, Возраст - 5, Пол - 6, Национальность - 7')
             param = int(input(f'Выберите что будем обновлять? --> '))
             print(f'=================================')
@@ -87,13 +92,7 @@ def work_for_table(connection, name_table):
             except Error as e:
                 print(f"The error '{e}' occurred")
         elif chois == 4:
-            print(f'=================================')
-            cursor.execute(f"SELECT nikname FROM {name_table}")
-            id = cursor.fetchall()
-            for i in id:
-                    print(f'{i}', end='')
-            print()
-            nik = input(f'Введите удаляемый ник контакта из списка выше: -->')
+            nik = nik_output(cursor, 'users')
             try:
                 cursor.execute(f"""
                 DELETE FROM
@@ -112,13 +111,7 @@ def work_for_table(connection, name_table):
         print(f'1 - добавить телефон, 2 - просмотр список телефонов контакта, 3 - обновление номера телефона, 4 - удаление телефона')
         chois = int(input(f'--> '))
         if chois == 1:
-            print(f'=================================')
-            cursor.execute(f"SELECT nikname FROM users")
-            id = cursor.fetchall()
-            for i in id:
-                print(f'{i}', end='')
-            print()
-            nik = input(f'Введите ник контакта из списка выше: --> ')
+            nik = nik_output(cursor, 'users')
             insert = []
             insert.append(input('Введите номер телефона - '))
             insert.append(input('Введите комментарий - '))
@@ -145,14 +138,7 @@ def work_for_table(connection, name_table):
             except Error as e:
                 print(f"The error '{e}' occurred")
         elif chois == 2:
-            print(f'=================================')
-            cursor.execute(f"SELECT nikname FROM users")
-            id = cursor.fetchall()
-            for i in id:
-                print(f'{i}', end='')
-            print()
-            nik = input(f'Введите ник контакта из списка выше: --> ')
-            print(f'=================================')
+            nik = nik_output(cursor, 'users')
             print(f' Выводим все телефоны контакта {nik}')
             try:
                 cursor.execute(f"""
@@ -175,15 +161,7 @@ def work_for_table(connection, name_table):
             except Error as e:
                 print(f"The error '{e}' occurred")
         elif chois == 3:
-            print(f'=================================')
-            cursor.execute(f"SELECT nikname FROM users")
-            id = cursor.fetchall()
-            for i in id:
-                print(f'{i}', end='')
-            print()
-            nik = input(f'Введите ник контакта из списка выше: --> ')
-            
-            print(f'=================================')
+            nik = nik_output(cursor, 'users')
             cursor.execute(f"""
                 SELECT 
                     phone.id, phone.phone, phone.comment 
@@ -201,7 +179,6 @@ def work_for_table(connection, name_table):
                 print(f'{i}')
             print()
             chois = int(input(f'Введите id, по которому будем менять данные: --> '))
-            
             print(f'=================================')
             print(f'Введите что будем менять?')
             print(f'1 - номер телефона, 2 - комментарий')
@@ -232,15 +209,7 @@ def work_for_table(connection, name_table):
             except Error as e:
                 print(f"The error '{e}' occurred")
         elif chois == 4:
-            print(f'=================================')
-            cursor.execute(f"SELECT nikname FROM users")
-            id = cursor.fetchall()
-            for i in id:
-                print(f'{i}', end='')
-            print()
-            nik = input(f'Введите ник контакта из списка выше: --> ')
-
-            print(f'=================================')
+            nik = nik_output(cursor, 'users')
             cursor.execute(f"""
                 SELECT 
                     phone.id, phone.phone, phone.comment 
