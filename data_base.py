@@ -5,7 +5,6 @@ from sqlite3 import Error
 def view_phone_numbers(soname, name, nik, phone):
     connection = create_connection('direkt.db')
     cursor = connection.cursor()
-    #nik = nik_output(cursor, 'users')
     print(f' Выводим все телефоны контакта {nik}')
     request = f"""
             SELECT
@@ -71,6 +70,70 @@ def view_phone_numbers(soname, name, nik, phone):
     except Error as e:
         print(f"The error '{e}' occurred")
     return id
+
+# Добавление новой записи в таблицу users и phone
+def ins_user_in_db(soname, name, patr, nik, age, gender, nationality, phone):
+    connection = create_connection('direkt.db')
+    cursor = connection.cursor()
+    print(f'Добавляем новый контакт с ником {nik}')
+    request = f"""
+                 INSERT INTO
+                 users
+                    (soname, name, patronymic, nikname, age, gender, nationality)
+                 VALUES
+                    ('{soname}', '{name}', '{patr}', '{nik}', '{age}', '{gender}', '{nationality}')"""
+    print(f'request = {request}')
+    try:
+        cursor.execute(request)
+        connection.commit()
+        result = f"Новый контакт с ником {nik} успешно добавлен"
+        print(result)
+    except Error as e:
+        result = f"The error '{e}' occurred"
+        print(result)
+    print(f' Ищем в БД контактов контакт с ником {nik}')
+    try:
+        cursor.execute(f"SELECT id FROM users WHERE nikname = '{nik}'")
+        id = cursor.fetchall()
+        connection.commit()
+        print(f"Id успешно найден")
+    except Error as e:
+        print(f"The error '{e}' occurred")
+    count = list(id[0])
+    try:
+        cursor.execute(f"""
+        INSERT INTO
+                phone
+            (phone, comment, user_id)
+        VALUES
+            ({int(phone)}, 'Основной', {count[0]})""")
+        connection.commit()
+        print(f"Телефон успешно добавлен контакту {nik}")
+    except Error as e:
+        print(f"The error '{e}' occurred")
+    return result
+
+#Удаление контакта
+def delete_user(nik):
+    connection = create_connection('direkt.db')
+    cursor = connection.cursor()
+    print(f' Удаляем контакт с ником {nik}')
+    request = f"""
+                DELETE FROM
+                    users
+                WHERE
+                    nikname = '{nik}'
+                """
+    print(f'request = {request}')
+    try:
+        cursor.execute(request)
+        connection.commit()
+        result = f"Контакт с ником {nik} успешно удалён"
+        print(result)
+    except Error as e:
+        result = f"The error '{e}' occurred"
+        print(result)
+    return result
 
 # Соединение с БД
 def create_connection(path):
