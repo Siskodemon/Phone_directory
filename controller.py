@@ -9,3 +9,9 @@ def ins_con_in_db(soname, name, patr, nik, age, gender, nationality, phone):
 
 def delete_contact(nik):
     view.delet_user_result(data_base.delete_user(nik))
+
+def Give_nik_to_controller(nikname):
+    return view.Show_phone_numbers(data_base.Give_phone_data_to_controller(nikname))
+
+def Put_contact_date_to_view(result):
+    return view.Show_data_contact(result)

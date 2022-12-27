@@ -2,13 +2,82 @@ import sqlite3
 from sqlite3 import Error
 
 
+# Отфильтровываем телефоны контакта и возвращаем их спиком кортежей
+def Give_phone_data_to_controller(nik):
+    import controller
+    connection = create_connection('direkt.db')
+    cursor = connection.cursor()
+    index = nik_id(cursor,connection,nik)[0]
+    controller.Put_contact_date_to_view(Give_contact_data_to_controller(cursor, connection, index))
+    print(f'nik = {nik}, index = {index}')
+    print(f' Выводим все телефоны контакта {nik}')
+    request = f"""
+            SELECT
+                phone, comment
+            FROM
+                phone
+            WHERE
+                user_id = {index}"""
+    try:
+        cursor.execute(request)
+        id = cursor.fetchall()
+        for i in id:
+            print(f'{i}')
+            
+        connection.commit()
+        print(f"Телефоны контакта {nik} успешно выведены")
+    except Error as e:
+        print(f"The error '{e}' occurred")
+    return list(id)
+
+#Поиск и передачча данных контакта по найденному id на вывод
+def Give_contact_data_to_controller(cursor, connection,id):
+    request = f"""
+                SELECT
+                    soname, name, patronymic, nikname, age, gender, nationality
+                FROM
+                    users
+                WHERE
+                    id = {id}"""
+    try:
+        cursor.execute(request)
+        id = cursor.fetchall()
+        for i in id:
+            print(f'{i}')
+        connection.commit()
+        print(f"Данные профиля контакта успешно найдены")
+    except Error as e:
+        print(f"The error '{e}' occurred")
+    result = list(id[0])
+    for i in range(0,len(result)):
+        if result[i] == None:
+            result[i] = ''
+    print(f'result = {result}')
+    return result
+
+def Update_contact_(id):
+        update = input(f'Введите новые данные: ')
+        try:
+            cursor.execute(f"""
+            UPDATE
+                {name_table}
+            SET
+                {param} = '{update}'
+            WHERE
+                nikname = '{nik}'
+            """)
+            connection.commit()
+            print(f"Данные успешно изменены")
+        except Error as e:
+            print(f"The error '{e}' occurred")
+
 def view_phone_numbers(soname, name, nik, phone):
     connection = create_connection('direkt.db')
     cursor = connection.cursor()
     print(f' Выводим все телефоны контакта {nik}')
     request = f"""
             SELECT
-                users.id, users.soname, users.name, users.nikname, phone.phone, phone.comment
+                users.soname, users.name, users.nikname, phone.phone, phone.comment
             FROM
                 users
             JOIN
@@ -120,9 +189,11 @@ def delete_user(nik):
     print(f' Удаляем контакт с ником {nik}')
     request = f"""
                 DELETE FROM
-                    users
+                    users, phone
                 WHERE
                     nikname = '{nik}'
+                AND
+                    users.id = phone.user_id
                 """
     print(f'request = {request}')
     try:
@@ -143,20 +214,31 @@ def create_connection(path):
         print("Соединение с бд установлено")
     except Error as e:
         print(f"The error '{e}' occurred")
-
     return connection
 
+def nik_id(focus, connection, nik):
+    print(f'Ищем в БД контактов контакт с ником {nik}')
+    try:
+        focus.execute(f"SELECT id FROM users WHERE nikname = '{nik}'")
+        id = focus.fetchall()
+        connection.commit()
+        print(f"Id успешно найден")
+    except Error as e:
+        print(f"The error '{e}' occurred")
+    count = list(id[0])
+    return count
+
 # #Вывод списка значений из поля nikname
-def nik_output(focus,table):
-    print(f'=================================')
-    focus.execute(f"SELECT nikname FROM {table}")
-    id = focus.fetchall()
-    for i in id:
-        print(f'{i}', end='')
-    print()
-    nikname= input(f'Введите ник контакта из списка выше: -->')
-    print(f'=================================')
-    return nikname
+# def nik_output(focus,table):
+#     print(f'=================================')
+#     focus.execute(f"SELECT nikname FROM {table}")
+#     id = focus.fetchall()
+#     for i in id:
+#         print(f'{i}', end='')
+#     print()
+#     nikname= input(f'Введите ник контакта из списка выше: -->')
+#     print(f'=================================')
+#     return nikname
 
 # # Работа с таблицей в инициализированной бд
 # def work_for_table(connection, name_table):
@@ -243,34 +325,34 @@ def nik_output(focus,table):
 #     elif name_table == 'phone':
 #         print(f'Выберите действие: ')
 #         print(f'1 - добавить телефон, 2 - просмотр список телефонов контакта, 3 - обновление номера телефона, 4 - удаление телефона')
-#         chois = int(input(f'--> '))
-#         if chois == 1:
-#             nik = nik_output(cursor, 'users')
-#             insert = []
-#             insert.append(input('Введите номер телефона - '))
-#             insert.append(input('Введите комментарий - '))
-#             print(f' Добавляем следующие данные в БД номеров телефонов контакта {nik} - {insert}')
-#             try:
-#                 cursor.execute(f"SELECT id FROM users WHERE nikname = '{nik}'")
-#                 id = cursor.fetchall()
-#                 print(f'Тип id - {type(id[0])}')
-#                 print(f'Найденый id - {id[0]}')
-#                 connection.commit()
-#                 print(f"Id успешно найден")
-#             except Error as e:
-#                 print(f"The error '{e}' occurred")
-#             count = list(id[0])
-#             try:
-#                 cursor.execute(f"""
-#                 INSERT INTO
-#                 {name_table}
-#                     (phone, comment, user_id)
-#                 VALUES
-#                     ({int(insert[0])}, '{insert[1]}', {count[0]})""")
-#                 connection.commit()
-#                 print(f"Телефон успешно добавлен контакту {nik}")
-#             except Error as e:
-#                 print(f"The error '{e}' occurred")
+        # chois = int(input(f'--> '))
+        # if chois == 1:
+        #     nik = nik_output(cursor, 'users')
+        #     insert = []
+        #     insert.append(input('Введите номер телефона - '))
+        #     insert.append(input('Введите комментарий - '))
+        #     print(f' Добавляем следующие данные в БД номеров телефонов контакта {nik} - {insert}')
+        #     try:
+        #         cursor.execute(f"SELECT id FROM users WHERE nikname = '{nik}'")
+        #         id = cursor.fetchall()
+        #         print(f'Тип id - {type(id[0])}')
+        #         print(f'Найденый id - {id[0]}')
+        #         connection.commit()
+        #         print(f"Id успешно найден")
+        #     except Error as e:
+        #         print(f"The error '{e}' occurred")
+        #     count = list(id[0]) #(1,)
+        #     try:
+        #         cursor.execute(f"""
+        #         INSERT INTO
+        #         {name_table}
+        #             (phone, comment, user_id)
+        #         VALUES
+        #             ({int(insert[0])}, '{insert[1]}', {count[0]})""")
+        #         connection.commit()
+        #         print(f"Телефон успешно добавлен контакту {nik}")
+        #     except Error as e:
+        #         print(f"The error '{e}' occurred")
 #         elif chois == 2:
 #             nik = nik_output(cursor, 'users')
 #             print(f' Выводим все телефоны контакта {nik}')
@@ -391,7 +473,7 @@ def nik_output(focus,table):
 #     except Error as e:
 #         print(f"The error '{e}' occurred")
 
-# # команда для создания таблицы user в базе данных
+# команда для создания таблицы user в базе данных
 # user_table ="""
 #       CREATE TABLE IF NOT EXISTS users(
 #       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -411,7 +493,7 @@ def nik_output(focus,table):
 #       phone INTEGER NOT NULL,
 #       comment TEXT,
 #       user_id INTEGER NOT NULL, 
-#       FOREIGN KEY (user_id) REFERENCES users(id)
+#       FOREIGN KEY (user_id) REFERENCES user(sid)
 #       );"""
 
 # create_table(bd, user_table, 'users')

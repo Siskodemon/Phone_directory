@@ -10,6 +10,12 @@
 # textvariable = v   -
 
 import controller
+import tkinter as tk
+import sqlite3
+from tkinter import *
+from tkinter import ttk
+from tkinter.ttk import Radiobutton
+from tkinter import messagebox
 
 def clicked():
     nik = View_filter_nikname.get()
@@ -24,8 +30,16 @@ def view_table(table:list):
     for i in tree.get_children():
         tree.delete(i)
     #Добавляем данные в таблицу
+    print(list(table))
+    id = 1
     for person in table:
-        tree.insert("", END, values=person)
+        #tree.insert("",END ,values=id)
+        ins = list(str(id))
+        for i in person:
+            ins.append(i)
+        print(ins)
+        tree.insert("", END, values=ins)
+        id += 1
 
 def insert_contact():
     if ins_soname.get() != '' and ins_name.get() != '' and ins_nikname.get() !='' and ins_phone.get() !='':
@@ -46,18 +60,44 @@ def view_ins_cont_result(result):
     return contact_ins_result_lable.configure(text=f'{result}')
 
 def delet_user_contact():
-    nik = Del_nikname.get()
+    nik = Nikname_Entry.get()
     return controller.delete_contact(nik)
 
+# Извлекаем ник нэйм из поля ввода и передаём в controller
+def Search_date_of_contact():
+    nik = Nikname_os_Entry.get()
+    return controller.Give_nik_to_controller(nik)
 
-def delet_user_result(result):
-    return Del_user_result_label.configure(text=result)
+#Принемаем отфильтрованные номера телефонов контакта из файла Controlle и выводим их в таблицу
+def Show_phone_numbers(data):
+    # Чистим данныев таблице
+    for i in tree_phone.get_children():
+        tree_phone.delete(i)
+    # Добавляем данные в таблицу
+    print(list(data))
+    id = 1
+    for person in data:
+        #tree.insert("",END ,values=id)
+        ins = list(str(id))
+        for i in person:
+            ins.append(i)
+        print(ins)
+        tree_phone.insert("", END, values=ins)
+        id += 1
+
+# Передаю данные контакта на вывод
+def Show_data_contact(result):
+    list = result
+    Soname_Entry.insert(0,list[0])
+    Name_Entry.insert(0, list[1])
+    Patronymic_Entry.insert(0, list[2])
+    Nikname_Entry.insert(0, list[3])
+    Age_Entry.insert(0, list[4])
+    Gender_Entry.insert(0, list[5])
+    Nationality_Entry.insert(0, list[6])
+    return result
  
-import tkinter as tk
-import sqlite3
-from tkinter import *
-from tkinter import ttk
-from tkinter.ttk import Radiobutton
+#messagebox.showinfo('Заголовок', 'Текст')
 
 root = Tk()
 root.title("Телефонная книга")
@@ -199,10 +239,10 @@ tree.configure(yscroll=scrollbar.set)
 
 #Размещаем виджеты на сетке вкладки
 View_text.grid(column=0, row=0,columnspan=5)
-View_filter_lable_name.grid(column=0, row=1)
-View_filter_name.grid(column=0, row=2)
-View_filter_lable_soname.grid(column=1, row=1)
-View_filter_soname.grid(column=1, row=2)
+View_filter_lable_soname.grid(column=0, row=1)
+View_filter_soname.grid(column=0, row=2)
+View_filter_lable_name.grid(column=1, row=1)
+View_filter_name.grid(column=1, row=2)
 View_filter_lable_nikname.grid(column=2, row=1)
 View_filter_nikname.grid(column=2, row=2)
 View_filter_lable_phone_number.grid(column=3, row=1)
@@ -216,29 +256,94 @@ scrollbar.grid(column=5, row=3,  sticky="ns")
 # ======================================================================================================
 change_data = ttk.Frame(tab_control)
 tab_control.add(change_data, text='Изменение') 
-change_text = Label(change_data, text='Изменение данных телефонной книги', padx=1, pady=25)
-change_text.grid(column=0, row=0, columnspan=7)
+change_text = Label(change_data, text='Изменение данных телефонной книги', padx=1, pady=2)
+change_text.grid(column=0, row=0, columnspan=10)
 
-# # Выбор между введением пользователя или телефона
-# selected = IntVar()
-# r_b1 = Radiobutton(change_data, text="Редактировать контактное лицо", value=1, variable=selected)
-# r_b2 = Radiobutton(change_data, text="Редактировать данные телефонов контакта", value=2, variable=selected)
+# Задаём общие виджеты для вывода данных контакта
+Lable_os_nikname = Label(change_data, text='Никнэйм')
+Nikname_os_Entry = Entry(change_data, width=15)
+Os_button = Button(change_data, text='Поиск', command=Search_date_of_contact)
+Empty_lable = Label(change_data, text='')
 
-# r_b1.grid(column=0, row=1, columnspan=4)
-# r_b2.grid(column=4, row=1, columnspan=4)
+# Задаём виджеты для обновление данных контакта пользователя
+Lable_soname = Label(change_data, text='Фамилия')
+Soname_Entry = Entry(change_data, width=15)
+Lable_name = Label(change_data, text='Имя')
+Name_Entry = Entry(change_data, width=15)
+Lable_patronymic = Label(change_data, text='Отчество')
+Patronymic_Entry = Entry(change_data, width=15)
+Lable_nikname = Label(change_data, text='Никнэйм')
+Nikname_Entry = Entry(change_data, width=15)
+Lable_age = Label(change_data, text='Возраст')
+Age_Entry = Entry(change_data, width=15)
+Lable_gender = Label(change_data, text='Пол')
+Gender_Entry = Entry(change_data, width=15)
+Lable_nationality = Label(change_data, text='Национальность')
+Nationality_Entry = Entry(change_data, width=15)
+Update_button = Button(change_data, text='Обновить контакт',command=delet_user_contact)
+Del_button = Button(change_data, text='Удалить контакт',command=delet_user_contact)
+Lable_result = Label(change_data, text='Тут будет результат')
 
-# Задаём виджеты для удаления пользователя
-Del_lable_nikname = Label(change_data, text='Никнэйм')
-Del_nikname = Entry(change_data, width=10)
-Del_button = Button(change_data, text='Удалить контакт', command=delet_user_contact)
-Del_user_result_label = Label(change_data, text='')
+# Размечаем общие виджеты для вывода данных контакта
+Lable_os_nikname.grid(row=1, column=0, padx=2)
+Nikname_os_Entry.grid(row=2, column=0, padx=2)
+Os_button.grid(row=2, column=1, padx=2)
+Empty_lable.grid(row=3, column=0, padx=2, pady=10)
 
-#Размечаем виджеты для удаления пользователя
-Del_lable_nikname.grid(column=0, row=1, columnspan=2)
-Del_nikname.grid(column=0, row=2)
-Del_button.grid(column=1, row=2)
-Del_user_result_label.grid(column=0, row=3, columnspan=2)
+# Размечаем виджеты для обновление данных контакта пользователя
+Lable_soname.grid(row = 4, column=0, padx=2, pady=2)
+Soname_Entry.grid(row = 4, column=1, padx=2, pady=2)
+Lable_name.grid(row = 5, column=0, padx=2, pady=2)
+Name_Entry.grid(row = 5, column=1, padx=2, pady=2)
+Lable_patronymic.grid(row = 6, column=0, padx=2, pady=2)
+Patronymic_Entry.grid(row = 6, column=1, padx=2, pady=2)
+Lable_nikname.grid(row = 7, column=0, padx=2, pady=2)
+Nikname_Entry.grid(row = 7, column=1, padx=2, pady=2)
+Lable_age.grid(row = 8, column=0, padx=2, pady=2)
+Age_Entry.grid(row = 8, column=1, padx=2, pady=2)
+Lable_gender.grid(row = 9, column=0, padx=2, pady=2)
+Gender_Entry.grid(row = 9, column=1, padx=2, pady=2)
+Lable_nationality.grid(row = 10, column=0, padx=2, pady=2)
+Nationality_Entry.grid(row = 10, column=1, padx=2, pady=2)
+Update_button.grid(row = 11, column=0, padx=2, pady=2)
+Del_button.grid(row = 11, column=1, padx=2, pady=2)
+Lable_result.grid(row = 12, column=0, columnspan=2, padx=2, pady=2)
 
+# Задаём виджеты для просмотра и обновления телефонов контакта
+Lable_phone = Label(change_data, text='Телефон')
+Phone_Entry = Entry(change_data, width=15)
+Lable_comment = Label(change_data, text='Комментарий')
+Comment_Entry = Entry(change_data, width=15)
+Update_phone_button = Button(change_data, text='Обновить телефон', command=delet_user_contact)
+Del_phone_button = Button(change_data, text='Удалить телефон', command=delet_user_contact)
+
+columns_phone = ("№", "phone", "comment")
+tree_phone = ttk.Treeview(change_data, columns=columns_phone, show="headings")
+
+# определяем заголовки с выпавниваем по левому краю
+tree_phone.heading("№", text="№", anchor=W)
+tree_phone.heading("phone", text="Телефон", anchor=W)
+tree_phone.heading("comment", text="Комментарий", anchor=W)
+
+# настраиваем столбцы
+tree_phone.column("#1", stretch=NO, width=30)
+tree_phone.column("#2", stretch=NO, width=100)
+tree_phone.column("#3", stretch=NO, width=100)
+
+# добавляем вертикальную прокрутку
+scrollbar = ttk.Scrollbar(change_data, orient=VERTICAL,command=tree_phone.yview)
+tree_phone.configure(yscroll=scrollbar.set)
+
+# Размечаем виджеты для обновление данных контакта пользователя
+Lable_phone.grid(row = 4, column=2, padx=25, pady=2)
+Phone_Entry.grid(row = 4, column=3, padx=2, pady=2)
+Lable_comment.grid(row = 5, column=2, padx=25, pady=2)
+Comment_Entry.grid(row = 5, column=3, padx=2, pady=2)
+Update_phone_button.grid(row = 4, column=4, padx=2, pady=2)
+Del_phone_button.grid(row = 5, column=4, padx=2, pady=2)
+
+tree_phone.grid(column=2, row = 6, rowspan=16, columnspan=3, padx=20, pady=2)
+scrollbar.grid(column=4, row=6,  sticky="ns", pady=2, rowspan=16)
 
 tab_control.grid(column=0, row=0)
 
