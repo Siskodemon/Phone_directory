@@ -17,6 +17,7 @@ from tkinter import ttk
 from tkinter.ttk import Radiobutton
 from tkinter import messagebox
 
+nik=str()
 def clicked():
     nik = View_filter_nikname.get()
     soname = View_filter_soname.get()
@@ -59,9 +60,14 @@ def insert_contact():
 def view_ins_cont_result(result):
     return contact_ins_result_lable.configure(text=f'{result}')
 
+# Передаём указнный никнэйм для процедурцы удалёния контакта и его данных из БД
 def delet_user_contact():
     nik = Nikname_Entry.get()
     return controller.delete_contact(nik)
+
+# Отображаем результат выполнения функции удаления
+def delet_user_result(result):
+    return Lable_result.configure(text=result)
 
 # Извлекаем ник нэйм из поля ввода и передаём в controller
 def Search_date_of_contact():
@@ -88,15 +94,40 @@ def Show_phone_numbers(data):
 # Передаю данные контакта на вывод
 def Show_data_contact(result):
     list = result
+    Soname_Entry.delete(first=0, last=END)
     Soname_Entry.insert(0,list[0])
+    Name_Entry.delete(first=0, last=END)
     Name_Entry.insert(0, list[1])
+    Patronymic_Entry.delete(first=0, last=END)
     Patronymic_Entry.insert(0, list[2])
+    Nikname_Entry.delete(first=0, last=END)
     Nikname_Entry.insert(0, list[3])
+    global nik
+    nik = Nikname_Entry.get()
+    Age_Entry.delete(first=0, last=END)
     Age_Entry.insert(0, list[4])
+    Gender_Entry.delete(first=0, last=END)
     Gender_Entry.insert(0, list[5])
+    Nationality_Entry.delete(first=0, last=END)
     Nationality_Entry.insert(0, list[6])
     return result
  
+# Передаю новые данные контакта в DB
+def Get_update_data():
+    list = []
+    list.append(Soname_Entry.get())
+    list.append(Name_Entry.get())
+    list.append(Patronymic_Entry.get())
+    list.append(Nikname_Entry.get())
+    list.append(Age_Entry.get())
+    list.append(Gender_Entry.get())
+    list.append(Nationality_Entry.get())
+    global nik
+    return controller.Give_update_data_to_db(list,nik)
+
+def Get_update_result(result):
+    return Lable_result.configure(text=result)
+
 #messagebox.showinfo('Заголовок', 'Текст')
 
 root = Tk()
@@ -280,7 +311,7 @@ Lable_gender = Label(change_data, text='Пол')
 Gender_Entry = Entry(change_data, width=15)
 Lable_nationality = Label(change_data, text='Национальность')
 Nationality_Entry = Entry(change_data, width=15)
-Update_button = Button(change_data, text='Обновить контакт',command=delet_user_contact)
+Update_button = Button(change_data, text='Обновить контакт', command=Get_update_data)
 Del_button = Button(change_data, text='Удалить контакт',command=delet_user_contact)
 Lable_result = Label(change_data, text='Тут будет результат')
 
@@ -314,7 +345,7 @@ Lable_phone = Label(change_data, text='Телефон')
 Phone_Entry = Entry(change_data, width=15)
 Lable_comment = Label(change_data, text='Комментарий')
 Comment_Entry = Entry(change_data, width=15)
-Update_phone_button = Button(change_data, text='Обновить телефон', command=delet_user_contact)
+Update_phone_button = Button(change_data, text='Обновить телефон', command=Get_update_data)
 Del_phone_button = Button(change_data, text='Удалить телефон', command=delet_user_contact)
 
 columns_phone = ("№", "phone", "comment")

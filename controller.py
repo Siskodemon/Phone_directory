@@ -15,3 +15,6 @@ def Give_nik_to_controller(nikname):
 
 def Put_contact_date_to_view(result):
     return view.Show_data_contact(result)
+
+def Give_update_data_to_db(list,nik):
+    return data_base.Update_contact_db(list,nik)

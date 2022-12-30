@@ -55,21 +55,31 @@ def Give_contact_data_to_controller(cursor, connection,id):
     print(f'result = {result}')
     return result
 
-def Update_contact_(id):
-        update = input(f'Введите новые данные: ')
-        try:
-            cursor.execute(f"""
-            UPDATE
-                {name_table}
-            SET
-                {param} = '{update}'
-            WHERE
-                nikname = '{nik}'
-            """)
-            connection.commit()
-            print(f"Данные успешно изменены")
-        except Error as e:
-            print(f"The error '{e}' occurred")
+def Update_contact_db(data,nik):
+    connection = create_connection('direkt.db')
+    cursor = connection.cursor()
+    try:
+        cursor.execute(f"""
+        UPDATE
+            users 
+        SET
+            soname = '{data[0]}',
+            name = '{data[1]}',
+            patronymic = '{data[2]}',
+            nikname = '{data[3]}',
+            age = '{data[4]}',
+            gender = '{data[5]}',
+            nationality = '{data[6]}'
+        WHERE
+            nikname = '{nik}';
+        """)
+        connection.commit()
+        result = f"Данные успешно изменены"
+        print(result)
+    except Error as e:
+        result = f"The error '{e}' occurred"
+        print(result)
+    return result
 
 def view_phone_numbers(soname, name, nik, phone):
     connection = create_connection('direkt.db')
@@ -186,19 +196,25 @@ def ins_user_in_db(soname, name, patr, nik, age, gender, nationality, phone):
 def delete_user(nik):
     connection = create_connection('direkt.db')
     cursor = connection.cursor()
+    index = nik_id(cursor,connection,nik)
     print(f' Удаляем контакт с ником {nik}')
-    request = f"""
+    try:
+        request = f"""
                 DELETE FROM
-                    users, phone
+                    phone
+                WHERE
+                    user_id = '{index}'
+                   """
+        cursor.execute(request)
+        request = f"""
+                DELETE FROM
+                    users
                 WHERE
                     nikname = '{nik}'
-                AND
-                    users.id = phone.user_id
-                """
-    print(f'request = {request}')
-    try:
+                    """
         cursor.execute(request)
         connection.commit()
+        #print(f'request = {request}')
         result = f"Контакт с ником {nik} успешно удалён"
         print(result)
     except Error as e:
